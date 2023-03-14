@@ -2,19 +2,6 @@ package abft
 
 import "github.com/Fantom-foundation/lachesis-base/utils/cachescale"
 
-type Config struct {
-}
-
-// DefaultConfig for livenet.
-func DefaultConfig() Config {
-	return Config{}
-}
-
-// LiteConfig is for tests or inmemory.
-func LiteConfig() Config {
-	return Config{}
-}
-
 // StoreCacheConfig is a cache config for store db.
 type StoreCacheConfig struct {
 	// Cache size for Roots.

@@ -66,8 +66,7 @@ func FakeLachesis(nodes []idx.ValidatorID, weights []pos.Weight, mods ...memoryd
 
 	input := NewEventStore()
 
-	config := LiteConfig()
-	lch := NewIndexedLachesis(store, input, &adapters.VectorToDagIndexer{Index: vecfc.NewIndex(crit, vecfc.LiteConfig())}, crit, config)
+	lch := NewIndexedLachesis(store, input, &adapters.VectorToDagIndexer{Index: vecfc.NewIndex(crit, vecfc.LiteConfig())}, crit)
 
 	extended := &TestLachesis{
 		IndexedLachesis: lch,

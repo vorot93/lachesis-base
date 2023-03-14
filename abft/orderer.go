@@ -21,10 +21,9 @@ type OrdererDagIndex interface {
 // Orderer processes events to reach finality on their order.
 // Unlike abft.Lachesis, this raw level of abstraction doesn't track cheaters detection
 type Orderer struct {
-	config Config
-	crit   func(error)
-	store  *Store
-	input  EventSource
+	crit  func(error)
+	store *Store
+	input EventSource
 
 	election *election.Election
 	dagIndex OrdererDagIndex
@@ -35,9 +34,8 @@ type Orderer struct {
 // NewOrderer creates Orderer instance.
 // Unlike Lachesis, Orderer doesn't updates DAG indexes for events, and doesn't detect cheaters
 // It has only one purpose - reaching consensus on events order.
-func NewOrderer(store *Store, input EventSource, dagIndex OrdererDagIndex, crit func(error), config Config) *Orderer {
+func NewOrderer(store *Store, input EventSource, dagIndex OrdererDagIndex, crit func(error)) *Orderer {
 	p := &Orderer{
-		config:   config,
 		store:    store,
 		input:    input,
 		crit:     crit,

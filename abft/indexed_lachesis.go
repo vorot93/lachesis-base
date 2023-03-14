@@ -38,9 +38,9 @@ type DagIndexer interface {
 }
 
 // New creates IndexedLachesis instance.
-func NewIndexedLachesis(store *Store, input EventSource, dagIndexer DagIndexer, crit func(error), config Config) *IndexedLachesis {
+func NewIndexedLachesis(store *Store, input EventSource, dagIndexer DagIndexer, crit func(error)) *IndexedLachesis {
 	p := &IndexedLachesis{
-		Lachesis:      NewLachesis(store, input, dagIndexer, crit, config),
+		Lachesis:      NewLachesis(store, input, dagIndexer, crit),
 		dagIndexer:    dagIndexer,
 		uniqueDirtyID: uniqueID{new(big.Int)},
 	}
