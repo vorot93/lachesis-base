@@ -190,6 +190,7 @@ func (vi *Engine) fillEventVectors(e dag.Event) (allVecs, error) {
 			if myVecs.before.IsForkDetected(n) {
 				continue
 			}
+		nextCreator:
 			for _, branchID1 := range vi.bi.BranchIDByCreators[n] {
 				for _, branchID2 := range vi.bi.BranchIDByCreators[n] {
 					a := branchID1
@@ -203,11 +204,10 @@ func (vi *Engine) fillEventVectors(e dag.Event) (allVecs, error) {
 					}
 					if myVecs.before.MinSeq(a) <= myVecs.before.Seq(b) && myVecs.before.MinSeq(b) <= myVecs.before.Seq(a) {
 						vi.setForkDetected(myVecs.before, n)
-						goto nextCreator
+						continue nextCreator
 					}
 				}
 			}
-		nextCreator:
 		}
 	}
 
