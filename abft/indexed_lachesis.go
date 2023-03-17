@@ -81,18 +81,12 @@ func (p *IndexedLachesis) Process(e dag.Event) (err error) {
 	return nil
 }
 
-func (p *IndexedLachesis) Bootstrap(callback lachesis.ConsensusCallbacks) error {
-	base := p.Lachesis.OrdererCallbacks()
-	ordererCallbacks := OrdererCallbacks{
-		ApplyAtropos: base.ApplyAtropos,
-		EpochDBLoaded: func(epoch idx.Epoch) {
-			if base.EpochDBLoaded != nil {
-				base.EpochDBLoaded(epoch)
-			}
-			p.dagIndexer.Reset(p.store.GetValidators(), p.store.epochTable.VectorIndex, p.input.GetEvent)
-		},
+func (p *IndexedLachesis) Bootstrap(beginBlockFn lachesis.BeginBlockFn) error {
+	applyAtroposFn := p.Lachesis.GetApplyAtroposFn()
+	epochDBloadedFn := func(epoch idx.Epoch) {
+		p.dagIndexer.Reset(p.store.GetValidators(), p.store.epochTable.VectorIndex, p.input.GetEvent)
 	}
-	return p.Lachesis.BootstrapWithOrderer(callback, ordererCallbacks)
+	return p.Lachesis.BootstrapWithOrderer(beginBlockFn, applyAtroposFn, epochDBloadedFn)
 }
 
 type uniqueID struct {

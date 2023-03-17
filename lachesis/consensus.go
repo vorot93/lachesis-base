@@ -32,9 +32,3 @@ type BlockCallbacks struct {
 }
 
 type BeginBlockFn func(block *Block) BlockCallbacks
-
-// ConsensusCallbacks contains callbacks called during block processing by consensus engine
-type ConsensusCallbacks struct {
-	// BeginBlock returns further callbacks for processing of this block
-	BeginBlock BeginBlockFn
-}

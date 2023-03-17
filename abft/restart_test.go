@@ -184,7 +184,7 @@ func testRestartAndReset(t *testing.T, weights []pos.Weight, mutateWeights bool,
 			}
 
 			restored := NewIndexedLachesis(store, prev.input, &adapters.VectorToDagIndexer{Index: vecfc.NewIndex(prev.crit, vecfc.LiteConfig())}, prev.crit)
-			assertar.NoError(restored.Bootstrap(prev.callback))
+			assertar.NoError(restored.Bootstrap(prev.beginBlockFn))
 
 			lchs[RESTORED].IndexedLachesis = restored
 		}

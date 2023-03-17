@@ -32,20 +32,21 @@ func (es EpochState) String() string {
 }
 
 // Bootstrap restores abft's state from store.
-func (p *Orderer) Bootstrap(callback OrdererCallbacks) error {
+func (p *Orderer) Bootstrap(applyAtroposFn ApplyAtroposFn, epochDBLoadedFn EpochDBLoadedFn) error {
 	if p.election != nil {
 		return errors.New("already bootstrapped")
 	}
 	// block handler must be set before p.handleElection
-	p.callback = callback
+	p.applyAtroposFn = applyAtroposFn
+	p.epochDBLoadedFn = epochDBLoadedFn
 
 	// restore current epoch DB
 	err := p.loadEpochDB()
 	if err != nil {
 		return err
 	}
-	if p.callback.EpochDBLoaded != nil {
-		p.callback.EpochDBLoaded(p.store.GetEpoch())
+	if epochDBLoadedFn != nil {
+		epochDBLoadedFn(p.store.GetEpoch())
 	}
 	p.election = election.New(p.store.GetValidators(), p.store.GetLastDecidedFrame()+1, p.dagIndex.ForklessCause, p.store.GetFrameRoots)
 

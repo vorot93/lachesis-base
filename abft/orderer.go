@@ -8,11 +8,8 @@ import (
 	"github.com/Fantom-foundation/lachesis-base/inter/pos"
 )
 
-type OrdererCallbacks struct {
-	ApplyAtropos func(decidedFrame idx.Frame, atropos hash.Event) (sealEpoch *pos.Validators)
-
-	EpochDBLoaded func(idx.Epoch)
-}
+type ApplyAtroposFn func(decidedFrame idx.Frame, atropos hash.Event) (sealEpoch *pos.Validators)
+type EpochDBLoadedFn func(idx.Epoch)
 
 type OrdererDagIndex interface {
 	dagidx.ForklessCause
@@ -28,7 +25,8 @@ type Orderer struct {
 	election *election.Election
 	dagIndex OrdererDagIndex
 
-	callback OrdererCallbacks
+	applyAtroposFn  ApplyAtroposFn
+	epochDBLoadedFn EpochDBLoadedFn
 }
 
 // NewOrderer creates Orderer instance.

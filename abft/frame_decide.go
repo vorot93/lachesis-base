@@ -11,8 +11,8 @@ import (
 func (p *Orderer) onFrameDecided(frame idx.Frame, atropos hash.Event) (bool, error) {
 	// new checkpoint
 	var newValidators *pos.Validators
-	if p.callback.ApplyAtropos != nil {
-		newValidators = p.callback.ApplyAtropos(frame, atropos)
+	if p.applyAtroposFn != nil {
+		newValidators = p.applyAtroposFn(frame, atropos)
 	}
 
 	lastDecidedState := *p.store.GetLastDecidedState()
@@ -41,8 +41,8 @@ func (p *Orderer) resetEpochStore(newEpoch idx.Epoch) error {
 		return err
 	}
 
-	if p.callback.EpochDBLoaded != nil {
-		p.callback.EpochDBLoaded(newEpoch)
+	if p.epochDBLoadedFn != nil {
+		p.epochDBLoadedFn(newEpoch)
 	}
 	return nil
 }
