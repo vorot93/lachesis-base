@@ -74,27 +74,6 @@ func CloseTables(s interface{}) error {
 	return nil
 }
 
-// MigrateCaches sets target fields to get() result.
-func MigrateCaches(c interface{}, get func() interface{}) {
-	value := reflect.ValueOf(c).Elem()
-	for i := 0; i < value.NumField(); i++ {
-		if prefix := value.Type().Field(i).Tag.Get("cache"); prefix != "" {
-			field := value.Field(i)
-			var cache interface{}
-			if get != nil {
-				cache = get()
-			}
-			var val reflect.Value
-			if cache != nil {
-				val = reflect.ValueOf(cache)
-			} else {
-				val = reflect.Zero(field.Type())
-			}
-			field.Set(val)
-		}
-	}
-}
-
 type uniqKeys struct {
 	len  int
 	keys [][]byte

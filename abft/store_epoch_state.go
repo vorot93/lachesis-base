@@ -9,20 +9,15 @@ const esKey = "e"
 
 // SetEpochState stores epoch.
 func (s *Store) SetEpochState(e *EpochState) {
-	s.cache.EpochState = e
 	s.setEpochState([]byte(esKey), e)
 }
 
 // GetEpochState returns stored epoch.
 func (s *Store) GetEpochState() *EpochState {
-	if s.cache.EpochState != nil {
-		return s.cache.EpochState
-	}
 	e := s.getEpochState([]byte(esKey))
 	if e == nil {
 		s.crit(ErrNoGenesis)
 	}
-	s.cache.EpochState = e
 	return e
 }
 

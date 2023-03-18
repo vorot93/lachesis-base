@@ -734,7 +734,6 @@ func TestRandomForks(t *testing.T) {
 					assertar.NoError(vi.Add(a))
 				}
 
-				vi.cache.ForklessCause.Purge() // disable cache
 				for _, a := range processedArr {
 					for _, b := range processedArr {
 						pair := kv{

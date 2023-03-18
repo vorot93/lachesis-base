@@ -9,7 +9,6 @@ import (
 	"github.com/Fantom-foundation/lachesis-base/kvdb"
 	"github.com/Fantom-foundation/lachesis-base/kvdb/memorydb"
 	"github.com/Fantom-foundation/lachesis-base/kvdb/table"
-	"github.com/Fantom-foundation/lachesis-base/utils/simplewlru"
 )
 
 // Store is a abft persistent storage working over parent key-value database.
@@ -22,12 +21,6 @@ type Store struct {
 	table  struct {
 		LastDecidedState kvdb.Store `table:"c"`
 		EpochState       kvdb.Store `table:"e"`
-	}
-
-	cache struct {
-		LastDecidedState *LastDecidedState
-		EpochState       *EpochState
-		FrameRoots       *simplewlru.Cache `cache:"-"` // store by pointer
 	}
 
 	epochDB    kvdb.Store
@@ -55,13 +48,7 @@ func NewStore(mainDB kvdb.Store, getDB EpochDBProducer, crit func(error), cfg St
 
 	table.MigrateTables(&s.table, s.mainDB)
 
-	s.initCache()
-
 	return s
-}
-
-func (s *Store) initCache() {
-	s.cache.FrameRoots = s.makeCache(s.cfg.Cache.RootsNum, s.cfg.Cache.RootsFrames)
 }
 
 // NewMemStore creates store over memory map.
@@ -79,12 +66,7 @@ func NewMemStore() *Store {
 
 // Close leaves underlying database.
 func (s *Store) Close() error {
-	setnil := func() interface{} {
-		return nil
-	}
-
 	table.MigrateTables(&s.table, nil)
-	table.MigrateCaches(&s.cache, setnil)
 	table.MigrateTables(&s.epochTable, nil)
 	err := s.mainDB.Close()
 	if err != nil {
@@ -115,9 +97,6 @@ func (s *Store) dropEpochDB() error {
 
 // openEpochDB makes new epoch DB
 func (s *Store) openEpochDB(n idx.Epoch) error {
-	// Clear full LRU cache.
-	s.cache.FrameRoots.Purge()
-
 	s.epochDB = s.getEpochDB(n)
 	table.MigrateTables(&s.epochTable, s.epochDB)
 	return nil
@@ -154,12 +133,4 @@ func (s *Store) get(table kvdb.Store, key []byte, to interface{}) interface{} {
 		s.crit(err)
 	}
 	return to
-}
-
-func (s *Store) makeCache(weight uint, size int) *simplewlru.Cache {
-	cache, err := simplewlru.New(weight, size)
-	if err != nil {
-		s.crit(err)
-	}
-	return cache
 }

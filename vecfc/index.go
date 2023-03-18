@@ -8,7 +8,6 @@ import (
 	"github.com/Fantom-foundation/lachesis-base/kvdb"
 	"github.com/Fantom-foundation/lachesis-base/kvdb/table"
 	"github.com/Fantom-foundation/lachesis-base/utils/cachescale"
-	"github.com/Fantom-foundation/lachesis-base/utils/simplewlru"
 	"github.com/Fantom-foundation/lachesis-base/vecengine"
 )
 
@@ -38,12 +37,6 @@ type Index struct {
 		LowestAfterSeq   kvdb.Store `table:"s"`
 	}
 
-	cache struct {
-		HighestBeforeSeq *simplewlru.Cache
-		LowestAfterSeq   *simplewlru.Cache
-		ForklessCause    *simplewlru.Cache
-	}
-
 	cfg IndexConfig
 }
 
@@ -70,7 +63,6 @@ func NewIndex(crit func(error), config IndexConfig) *Index {
 		crit: crit,
 	}
 	vi.Engine = vecengine.NewIndex(crit, vi.GetEngineCallbacks())
-	vi.initCaches()
 
 	return vi
 }
@@ -81,22 +73,14 @@ func NewIndexWithEngine(crit func(error), config IndexConfig, engine *vecengine.
 		cfg:    config,
 		crit:   crit,
 	}
-	vi.initCaches()
 
 	return vi
-}
-
-func (vi *Index) initCaches() {
-	vi.cache.ForklessCause, _ = simplewlru.New(uint(vi.cfg.Caches.ForklessCausePairs), vi.cfg.Caches.ForklessCausePairs)
-	vi.cache.HighestBeforeSeq, _ = simplewlru.New(vi.cfg.Caches.HighestBeforeSeqSize, int(vi.cfg.Caches.HighestBeforeSeqSize))
-	vi.cache.LowestAfterSeq, _ = simplewlru.New(vi.cfg.Caches.LowestAfterSeqSize, int(vi.cfg.Caches.HighestBeforeSeqSize))
 }
 
 // Reset resets buffers.
 func (vi *Index) Reset(validators *pos.Validators, db kvdb.Store, getEvent func(hash.Event) dag.Event) {
 	vi.Engine.Reset(validators, db, getEvent)
 	vi.getEvent = getEvent
-	vi.cache.ForklessCause.Purge()
 	vi.onDropNotFlushed()
 }
 
@@ -131,8 +115,6 @@ func (vi *Index) onDbReset(db kvdb.Store) {
 }
 
 func (vi *Index) onDropNotFlushed() {
-	vi.cache.HighestBeforeSeq.Purge()
-	vi.cache.LowestAfterSeq.Purge()
 }
 
 // GetMergedHighestBefore returns HighestBefore vector clock without branches, where branches are merged into one
