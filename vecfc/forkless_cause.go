@@ -60,7 +60,7 @@ func (vi *Index) forklessCause(aID, bID hash.Event) bool {
 		return false
 	}
 
-	yes := vi.validators.NewCounter()
+	yes := vi.Validators().NewCounter()
 	// calculate forkless causing using the indexes
 	branchIDs := vi.Engine.BranchesInfo().BranchIDCreatorIdxs
 	for branchIDint, creatorIdx := range branchIDs {

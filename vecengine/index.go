@@ -67,6 +67,10 @@ func (vi *Engine) Reset(validators *pos.Validators, db kvdb.Store, getEvent func
 	}
 }
 
+func (vi *Engine) Validators() *pos.Validators {
+	return vi.validators
+}
+
 // Add calculates vector clocks for the event and saves into DB.
 func (vi *Engine) Add(e dag.Event) error {
 	vi.InitBranchesInfo()
