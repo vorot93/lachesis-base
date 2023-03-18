@@ -28,9 +28,7 @@ type IndexConfig struct {
 type Index struct {
 	*vecengine.Engine
 
-	crit          func(error)
-	validators    *pos.Validators
-	validatorIdxs map[idx.ValidatorID]idx.Validator
+	crit func(error)
 
 	getEvent func(hash.Event) dag.Event
 
@@ -98,8 +96,6 @@ func (vi *Index) initCaches() {
 func (vi *Index) Reset(validators *pos.Validators, db kvdb.Store, getEvent func(hash.Event) dag.Event) {
 	vi.Engine.Reset(validators, db, getEvent)
 	vi.getEvent = getEvent
-	vi.validators = validators
-	vi.validatorIdxs = validators.Idxs()
 	vi.cache.ForklessCause.Purge()
 	vi.onDropNotFlushed()
 }
