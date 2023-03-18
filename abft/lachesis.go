@@ -24,15 +24,24 @@ type DagIndex interface {
 // confirmed events traversal, cheaters detection.
 // Use this structure if need a general-purpose consensus. Instead, use lower-level abft.Orderer.
 type Lachesis struct {
-	*Orderer
-	dagIndex     DagIndex
-	beginBlockFn lachesis.BeginBlockFn
+	store *Store
+	input EventSource
+
+	election *election.Election
+	dagIndex DagIndex
+	crit     func(error)
+
+	beginBlockFn    lachesis.BeginBlockFn
+	applyAtroposFn  ApplyAtroposFn
+	epochDBLoadedFn EpochDBLoadedFn
 }
 
 // NewLachesis creates Lachesis instance.
 func NewLachesis(store *Store, input EventSource, dagIndex DagIndex, crit func(error)) *Lachesis {
 	p := &Lachesis{
-		Orderer:  NewOrderer(store, input, dagIndex, crit),
+		store:    store,
+		input:    input,
+		crit:     crit,
 		dagIndex: dagIndex,
 	}
 
