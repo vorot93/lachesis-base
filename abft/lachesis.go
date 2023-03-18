@@ -32,7 +32,6 @@ type Lachesis struct {
 	crit     func(error)
 
 	beginBlockFn    lachesis.BeginBlockFn
-	applyAtroposFn  ApplyAtroposFn
 	epochDBLoadedFn EpochDBLoadedFn
 }
 
@@ -97,15 +96,14 @@ func (p *Lachesis) applyAtropos(decidedFrame idx.Frame, atropos hash.Event) *pos
 }
 
 func (p *Lachesis) Bootstrap(callback lachesis.BeginBlockFn) error {
-	return p.BootstrapWithOrderer(callback, p.GetApplyAtroposFn(), nil)
+	return p.BootstrapWithOrderer(callback, nil)
 }
 
-func (p *Lachesis) BootstrapWithOrderer(beginBlockFn lachesis.BeginBlockFn, applyAtroposFn ApplyAtroposFn, epochDBLoadedFn EpochDBLoadedFn) error {
+func (p *Lachesis) BootstrapWithOrderer(beginBlockFn lachesis.BeginBlockFn, epochDBLoadedFn EpochDBLoadedFn) error {
 	if p.election != nil {
 		return errors.New("already bootstrapped")
 	}
 	// block handlers must be set before p.handleElection
-	p.applyAtroposFn = applyAtroposFn
 	p.epochDBLoadedFn = epochDBLoadedFn
 	p.beginBlockFn = beginBlockFn
 
@@ -122,8 +120,4 @@ func (p *Lachesis) BootstrapWithOrderer(beginBlockFn lachesis.BeginBlockFn, appl
 	// events reprocessing
 	_, err = p.bootstrapElection()
 	return nil
-}
-
-func (p *Lachesis) GetApplyAtroposFn() ApplyAtroposFn {
-	return p.applyAtropos
 }

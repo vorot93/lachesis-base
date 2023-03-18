@@ -3,12 +3,9 @@ package abft
 import (
 	"github.com/Fantom-foundation/lachesis-base/abft/dagidx"
 	"github.com/Fantom-foundation/lachesis-base/abft/election"
-	"github.com/Fantom-foundation/lachesis-base/hash"
 	"github.com/Fantom-foundation/lachesis-base/inter/idx"
-	"github.com/Fantom-foundation/lachesis-base/inter/pos"
 )
 
-type ApplyAtroposFn func(decidedFrame idx.Frame, atropos hash.Event) (sealEpoch *pos.Validators)
 type EpochDBLoadedFn func(idx.Epoch)
 
 type OrdererDagIndex interface {
@@ -25,7 +22,6 @@ type Orderer struct {
 	election *election.Election
 	dagIndex OrdererDagIndex
 
-	applyAtroposFn  ApplyAtroposFn
 	epochDBLoadedFn EpochDBLoadedFn
 }
 

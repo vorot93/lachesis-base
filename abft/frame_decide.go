@@ -10,10 +10,7 @@ import (
 // It includes: moving current decided frame, txs ordering and execution, epoch sealing.
 func (p *Lachesis) onFrameDecided(frame idx.Frame, atropos hash.Event) (bool, error) {
 	// new checkpoint
-	var newValidators *pos.Validators
-	if p.applyAtroposFn != nil {
-		newValidators = p.applyAtroposFn(frame, atropos)
-	}
+	newValidators := p.applyAtropos(frame, atropos)
 
 	lastDecidedState := *p.store.GetLastDecidedState()
 	if newValidators != nil {

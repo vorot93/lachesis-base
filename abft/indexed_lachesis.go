@@ -82,11 +82,10 @@ func (p *IndexedLachesis) Process(e dag.Event) (err error) {
 }
 
 func (p *IndexedLachesis) Bootstrap(beginBlockFn lachesis.BeginBlockFn) error {
-	applyAtroposFn := p.Lachesis.GetApplyAtroposFn()
 	epochDBloadedFn := func(epoch idx.Epoch) {
 		p.dagIndexer.Reset(p.store.GetValidators(), p.store.epochTable.VectorIndex, p.input.GetEvent)
 	}
-	return p.Lachesis.BootstrapWithOrderer(beginBlockFn, applyAtroposFn, epochDBloadedFn)
+	return p.Lachesis.BootstrapWithOrderer(beginBlockFn, epochDBloadedFn)
 }
 
 type uniqueID struct {
