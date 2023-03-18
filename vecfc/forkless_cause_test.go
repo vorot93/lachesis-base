@@ -655,7 +655,7 @@ func TestRandomForks(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf("Test #%d", i), func(t *testing.T) {
-			r := rand.New(rand.NewSource(int64(i))) // nolint:gosec
+			r := rand.New(rand.NewSource(0)) // nolint:gosec
 
 			nodes := tdag.GenNodes(test.nodesNum)
 			cheaters := nodes[:test.cheatersNum]
