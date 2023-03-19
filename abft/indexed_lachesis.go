@@ -5,7 +5,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/Fantom-foundation/lachesis-base/abft/dagidx"
 	"github.com/Fantom-foundation/lachesis-base/hash"
 	"github.com/Fantom-foundation/lachesis-base/inter/dag"
 	"github.com/Fantom-foundation/lachesis-base/inter/idx"
@@ -22,13 +21,11 @@ var _ lachesis.Consensus = (*IndexedLachesis)(nil)
 // Use this structure if need a general-purpose consensus. Instead, use lower-level abft.Orderer.
 type IndexedLachesis struct {
 	*Lachesis
-	dagIndexer    DagIndexer
 	uniqueDirtyID uniqueID
 }
 
 type DagIndexer interface {
-	dagidx.VectorClock
-	dagidx.ForklessCause
+	DagIndex
 
 	Add(dag.Event) error
 	Flush()
@@ -41,7 +38,6 @@ type DagIndexer interface {
 func NewIndexedLachesis(store *Store, input EventSource, dagIndexer DagIndexer, crit func(error)) *IndexedLachesis {
 	p := &IndexedLachesis{
 		Lachesis:      NewLachesis(store, input, dagIndexer, crit),
-		dagIndexer:    dagIndexer,
 		uniqueDirtyID: uniqueID{new(big.Int)},
 	}
 
@@ -51,10 +47,12 @@ func NewIndexedLachesis(store *Store, input EventSource, dagIndexer DagIndexer, 
 // Build fills consensus-related fields: Frame, IsRoot
 // returns error if event should be dropped
 func (p *IndexedLachesis) Build(e dag.MutableEvent) error {
+	dagIndex := p.dagIndex.(DagIndexer)
+
 	e.SetID(p.uniqueDirtyID.sample())
 
-	defer p.dagIndexer.DropNotFlushed()
-	err := p.dagIndexer.Add(e)
+	defer dagIndex.DropNotFlushed()
+	err := dagIndex.Add(e)
 	if err != nil {
 		return err
 	}
@@ -67,8 +65,10 @@ func (p *IndexedLachesis) Build(e dag.MutableEvent) error {
 // All the event checkers must be launched.
 // Process is not safe for concurrent use.
 func (p *IndexedLachesis) Process(e dag.Event) (err error) {
-	defer p.dagIndexer.DropNotFlushed()
-	err = p.dagIndexer.Add(e)
+	dagIndex := p.dagIndex.(DagIndexer)
+
+	defer dagIndex.DropNotFlushed()
+	err = dagIndex.Add(e)
 	if err != nil {
 		return err
 	}
@@ -77,13 +77,13 @@ func (p *IndexedLachesis) Process(e dag.Event) (err error) {
 	if err != nil {
 		return err
 	}
-	p.dagIndexer.Flush()
+	dagIndex.Flush()
 	return nil
 }
 
 func (p *IndexedLachesis) Bootstrap(beginBlockFn lachesis.BeginBlockFn) error {
 	epochDBloadedFn := func(epoch idx.Epoch) {
-		p.dagIndexer.Reset(p.store.GetValidators(), p.store.epochTable.VectorIndex, p.input.GetEvent)
+		p.dagIndex.(DagIndexer).Reset(p.store.GetValidators(), p.store.epochTable.VectorIndex, p.input.GetEvent)
 	}
 	return p.Lachesis.BootstrapWithOrderer(beginBlockFn, epochDBloadedFn)
 }
